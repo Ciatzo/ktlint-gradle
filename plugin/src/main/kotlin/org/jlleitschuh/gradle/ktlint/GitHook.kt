@@ -57,6 +57,16 @@ private fun postCheck(
     ""
 }
 
+private fun popUnstagedChanges() =
+        """
+        git stash pop    
+        """.trimIndent()
+
+private fun stashUnstagedChanges() =
+        """
+        git stash --keep-index -u  
+        """.trimIndent()
+
 @Language("Sh")
 internal fun generateGitHook(
     taskName: String,
@@ -75,10 +85,14 @@ internal fun generateGitHook(
     echo "Running ktlint over these files:"
     echo "${'$'}CHANGED_FILES"
 
+    ${stashUnstagedChanges()}
+
     ${generateGradleCommand(taskName, gradleRootDirPrefix)}
 
     echo "Completed ktlint run."
     ${postCheck(shouldUpdateCommit)}
+
+    ${popUnstagedChanges()}
     echo "Completed ktlint hook."
 
     """.trimIndent()
